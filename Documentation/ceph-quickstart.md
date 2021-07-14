@@ -23,9 +23,11 @@ Kubernetes **v1.11** or higher is supported by Rook.
 To make sure you have a Kubernetes cluster that is ready for `Rook`, you can [follow these instructions](k8s-pre-reqs.md).
 
 In order to configure the Ceph storage cluster, at least one of these local storage options are required:
-- Raw devices (no partitions or formatted filesystems)
-- Raw partitions (no formatted filesystem)
-- PVs available from a storage class in `block` mode
+- Raw devices (no partitions or formatted filesystems).
+  - This requires `lvm2` to be installed on the host.
+    To avoid this dependency, you can create a single full-disk partition on the disk (see below).
+- Raw partitions (no formatted filesystem).
+- Persistent Volumes (including Local Persistent Volumes) available from a storage class in `block` mode.
 
 You can confirm whether your partitions or devices are formatted filesystems with the following command.
 
