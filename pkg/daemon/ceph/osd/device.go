@@ -17,7 +17,13 @@ limitations under the License.
 package osd
 
 import (
+	"encoding/binary"
 	"encoding/json"
+	"io"
+	"os"
+	"path"
+
+	"github.com/pkg/errors"
 )
 
 const (
@@ -63,4 +69,48 @@ type DeviceOsdIDEntry struct {
 func (m *DeviceOsdMapping) String() string {
 	b, _ := json.Marshal(m)
 	return string(b)
+}
+
+// allow this to be overridden for unit testing
+var device deviceReader = osDeviceReader{}
+
+type deviceReader interface {
+	OpenFile(name string, flag int, perm os.FileMode) (file, error)
+}
+
+type file interface {
+	io.Closer
+	io.Reader
+}
+
+// osDeviceReader implements deviceReader using the local disk.
+type osDeviceReader struct{}
+
+func (osDeviceReader) OpenFile(name string, flag int, perm os.FileMode) (file, error) {
+	return os.OpenFile(name, flag, perm)
+}
+
+// return true if the device has a bluestore header indicating it is a bluestore OSD
+func hasBluestoreHeader(deviceName string) (bool, error) {
+	devicePath := path.Join("/dev", deviceName)
+
+	dev, err := device.OpenFile(devicePath, os.O_RDONLY, os.ModeDevice)
+	if err != nil {
+		return false, errors.Wrapf(err, "failed to check if device %q has a bluestore header", devicePath)
+	}
+	defer dev.Close()
+
+	// check for the bluestore header "bluestore block device" (22 bytes long)
+	// see: https://github.com/ceph/ceph/blob/4dae3915a842281f93486b612f645eb2eb604385/src/os/bluestore/bluestore_types.cc#L35
+	// code based on: https://github.com/rekby/gpt/blob/7da10aec5566349f29875dad4a59c8341b01e00a/gpt.go#L81
+	sig := [22]byte{}
+	err = binary.Read(dev, binary.LittleEndian, &sig)
+	if err != nil {
+		return false, errors.Wrapf(err, "failed to read bluestore header from device %q", devicePath)
+	}
+	if string(sig[:]) == "bluestore block device" {
+		return true, nil
+	}
+
+	return false, nil
 }
