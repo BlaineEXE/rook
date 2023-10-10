@@ -11,7 +11,7 @@ require (
 	github.com/csi-addons/kubernetes-csi-addons v0.7.0
 	github.com/gemalto/kmip-go v0.0.10
 	github.com/go-ini/ini v1.67.0
-	github.com/google/go-cmp v0.5.9
+	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.3.1
 	github.com/hashicorp/vault/api v1.10.0
 	github.com/jetstack/cert-manager v1.7.3
