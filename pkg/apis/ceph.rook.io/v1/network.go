@@ -27,6 +27,11 @@ import (
 	"github.com/pkg/errors"
 )
 
+// EnforceHostNetwork is a package/global variable that can be set to force network getters to
+// always report that host network is enabled. This can be used, for example, to help allow Rook to
+// run in K8s clusters where there is no CNI and where host networking is required.
+var EnforceHostNetwork bool = false
+
 // IsMultus get whether to use multus network provider
 func (n *NetworkSpec) IsMultus() bool {
 	return n.Provider == NetworkProviderMultus
@@ -40,7 +45,7 @@ func (n *NetworkSpec) IsMultus() bool {
 // together with an empty or unset network provider has the same effect as
 // network.Provider set to "host"
 func (n *NetworkSpec) IsHost() bool {
-	return (n.HostNetwork && n.Provider == NetworkProviderDefault) || n.Provider == NetworkProviderHost
+	return EnforceHostNetwork || (n.HostNetwork && n.Provider == NetworkProviderDefault) || n.Provider == NetworkProviderHost
 }
 
 func ValidateNetworkSpec(clusterNamespace string, spec NetworkSpec) error {

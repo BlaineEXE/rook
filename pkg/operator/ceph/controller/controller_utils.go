@@ -116,6 +116,17 @@ func LoopDevicesAllowed() bool {
 	return loopDevicesAllowed
 }
 
+func SetEnforceHostNetwork(data map[string]string) {
+	// GetValue(cata, "ROOK_ENFORCE_HOST_NETWORK", "false")
+	// ParseBool()
+	// if err  -> logger.Warningf(...)
+	cephv1.EnforceHostNetwork = true
+}
+
+func EnforceHostNetwork() bool {
+	return cephv1.EnforceHostNetwork
+}
+
 // canIgnoreHealthErrStatusInReconcile determines whether a status of HEALTH_ERR in the CephCluster can be ignored safely.
 func canIgnoreHealthErrStatusInReconcile(cephCluster cephv1.CephCluster, controllerName string) bool {
 	// Get a list of all the keys causing the HEALTH_ERR status.

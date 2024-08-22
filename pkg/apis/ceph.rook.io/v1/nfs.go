@@ -46,6 +46,7 @@ func (n *CephNFS) IsHostNetwork(c *ClusterSpec) bool {
 	if n.Spec.Server.HostNetwork != nil {
 		return *n.Spec.Server.HostNetwork
 	}
+	// existing instances of IsHost stay the same because now IsHost() also checks EnforceHostNetwork
 	return c.Network.IsHost()
 }
 
